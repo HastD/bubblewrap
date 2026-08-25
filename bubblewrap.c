@@ -3104,7 +3104,7 @@ main (int    argc,
                          -1, false, false);
     }
 
-  if (opt_disable_userns || opt_assert_userns_disabled)
+  if (opt_disable_userns)
     {
       /* Verify that we can't make a new userns again */
       res = unshare (CLONE_NEWUSER);
@@ -3224,6 +3224,15 @@ main (int    argc,
   /* Should be the last thing before execve() so that filters don't
    * need to handle anything above */
   seccomp_programs_apply ();
+
+  if (opt_assert_userns_disabled)
+    {
+      /* Verify that we can't make a new userns again */
+      res = unshare (CLONE_NEWUSER);
+
+      if (res == 0)
+        die ("creation of new user namespaces was not disabled as requested");
+    }
 
   if (setup_finished_pipe[1] != -1)
     {
